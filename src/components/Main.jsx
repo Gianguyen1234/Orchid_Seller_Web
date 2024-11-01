@@ -17,6 +17,7 @@ export default function Main() {
         return resp.json();
       })
       .then((data) => {
+        console.log(data);
         setAPI(data);
         setLoading(false);
       })

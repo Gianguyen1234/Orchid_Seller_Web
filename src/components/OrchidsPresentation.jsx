@@ -22,6 +22,22 @@ export default function OrchidsPresentation({ orchidData }) {
     if (newRating !== null) setRatingFilter(newRating);
   };
 
+  // Function to filter and sort the orchids based on selected options
+  const filteredOrchids = orchidData.filter(orchid => {
+    if (ratingFilter === '5 Star' && orchid.rating < 5) return false;
+    if (ratingFilter === '4+ Star' && orchid.rating < 4) return false;
+    if (ratingFilter === '3+ Star' && orchid.rating < 3) return false;
+    return true;
+  });
+
+  const sortedOrchids = filteredOrchids.sort((a, b) => {
+    const order = sortOrder === 'asc' ? 1 : -1;
+    if (sortAttribute === 'rating') {
+      return (a.rating - b.rating) * order;
+    }
+    return 0; // Default natural order if no attribute selected
+  });
+
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* Header */}
@@ -91,7 +107,7 @@ export default function OrchidsPresentation({ orchidData }) {
 
       {/* Orchid Cards */}
       <Box display="flex" flexWrap="wrap" justifyContent="center" gap={4}>
-        {orchidData.map((orchid) => (
+        {sortedOrchids.map((orchid) => (
           <OrchidCard key={orchid.id} orchid={orchid} />
         ))}
       </Box>
