@@ -1,0 +1,20 @@
+@import "@fortawesome/fontawesome-free/css/all.css";
+@font-face {
+  font-family: "Montserrat";
+  src: url("./assets/fonts/Montserrat.woff2");
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+ 
+  font-family: "Montserrat", sans-serif;
+}
+.align_center {
+  display: flex;
+  align-items: center;
+}
