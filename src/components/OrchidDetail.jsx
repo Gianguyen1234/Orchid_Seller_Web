@@ -3,104 +3,91 @@ import { useParams } from "react-router-dom";
 import { data } from "../shared/ListOfOrchids";
 import {
   Button,
-  Divider,
-  Grid2,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableRow,
+  Grid,
   Typography,
+  Card,
+  CardMedia,
+  CardContent,
+  Box,
+  Paper,
+  IconButton,
+  Chip,
 } from "@mui/material";
 import ModalCase from "./ModalCase";
+import CloseIcon from "@mui/icons-material/Close";
 
 export default function OrchidDetail() {
   const [isOpen, setIsOpen] = useState(false);
-  const abc = useParams();
-  const orchid = data.find((obj) => {
-    return obj.id == abc.id;
-  });
+  const { id } = useParams();
+  const orchid = data.find((obj) => obj.id == id);
 
   return (
-    <div style={{ padding: "10px 10px" }}>
-      <Grid2 container spacing={2}>
-        <Grid2 size={3}>
-          <img src={orchid.image} alt={orchid.orchidName} style={{ width: "100%" }} />
-        </Grid2>
-        <Grid2 size={9}>
-          <Typography variant="h4" color="#4caf50">
-            {orchid.orchidName}
-          </Typography>
-          <Divider sx={{ mb: 2 }} />
-          <Typography variant="h5" color="#ffeb3b">
-            ${orchid.price}
-          </Typography>
-          <TableContainer>
-            <Table>
-              <TableBody sx={{ fontSize: "1.1em" }}>
-                <TableRow>
-                  <TableCell>
-                    <Typography variant="caption" color="primary">
-                      Is Natural:
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="h6" color="primary">
-                      {orchid.isNatural ? "Yes" : "No"}
-                    </Typography>
-                  </TableCell>
-                </TableRow>
+    <Box sx={{ padding: 4, backgroundColor: "#e0f2f1", minHeight: "100vh" }}>
+      <Grid container spacing={4} justifyContent="center">
+        <Grid item xs={12} md={6}>
+          <Card elevation={6} sx={{ borderRadius: 2, overflow: "hidden" }}>
+            <CardMedia
+              component="img"
+              image={orchid.image}
+              alt={orchid.orchidName}
+              sx={{ height: 400, objectFit: "cover", transition: "transform 0.5s", '&:hover': { transform: 'scale(1.05)' } }}
+            />
+            <CardContent>
+              <Typography variant="h4" color="#00796b" fontWeight="bold" gutterBottom>
+                {orchid.orchidName}
+              </Typography>
+              <Typography variant="h5" color="#d32f2f" fontWeight="bold">
+                ${orchid.price.toFixed(2)}
+              </Typography>
+              <Box mt={2}>
+                <Chip label={orchid.isNatural ? "Natural" : "Not Natural"} color={orchid.isNatural ? "success" : "default"} sx={{ marginRight: 1 }} />
+                <Chip label={orchid.isAttractive ? "Attractive" : "Not Attractive"} color={orchid.isAttractive ? "warning" : "default"} />
+              </Box>
+              <Typography variant="body1" color="text.secondary" sx={{ mt: 2 }}>
+                <strong>Details:</strong> {orchid.description}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                <strong>Shipping:</strong> Calculated At Checkout
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
 
-                <TableRow>
-                  <TableCell>
-                    <Typography variant="caption" color="primary">
-                      Is Attractive:
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="caption" color="primary">
-                      {orchid.isAttractive ? "Yes" : "No"}
-                    </Typography>
-                  </TableCell>
-                </TableRow>
+      <Box display="flex" justifyContent="center" mt={4}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => setIsOpen(true)}
+          sx={{ borderRadius: 20, paddingX: 4 }}
+        >
+          View in Clip
+        </Button>
+      </Box>
 
-                <TableRow>
-                  <TableCell>
-                    <Typography variant="caption" color="primary">
-                      Details:
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="caption" color="primary">
-                      {orchid.description}
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-
-                <TableRow>
-                  <TableCell>
-                    <Typography variant="caption" color="primary">
-                      Shipping:
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="caption" color="primary">
-                      Calculated At Checkout
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Grid2>
-      </Grid2>
-
-      <Grid2 maxWidth="sm">
-        <a onClick={() => setIsOpen(true)}>
-          <Button variant="outlined">View in clip</Button>
-        </a>
-        {isOpen && <ModalCase setIsOpen={setIsOpen} orchid={orchid} />}
-      </Grid2>
-    </div>
+      {isOpen && (
+        <Paper
+          elevation={8}
+          sx={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            padding: 2,
+            zIndex: 1000,
+            maxWidth: 600,
+            width: "100%",
+          }}
+        >
+          <IconButton
+            onClick={() => setIsOpen(false)}
+            sx={{ position: "absolute", top: 8, right: 8 }}
+          >
+            <CloseIcon />
+          </IconButton>
+          <ModalCase setIsOpen={setIsOpen} orchid={orchid} />
+        </Paper>
+      )}
+    </Box>
   );
 }

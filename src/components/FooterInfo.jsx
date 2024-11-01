@@ -13,7 +13,7 @@ function FooterInfo() {
         py: 4,
         px: { xs: 2, md: 8 },
         mt: 0,
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',     
       }}
     >
       <Grid container spacing={4} justifyContent="space-between">
