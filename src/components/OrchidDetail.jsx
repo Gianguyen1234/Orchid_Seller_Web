@@ -1,13 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Box, Typography, Card, CardMedia, CardContent, Button, Divider, Grid } from "@mui/material";
-import FeedbackForm from "./FeedbackForm"; // Import the new FeedbackForm component
+import { Box, Typography, Card, CardMedia, CardContent, Button, Divider, Grid , Paper} from "@mui/material";
+import FeedbackForm from "./FeedbackForm";
+import { UserAuth } from './services/AuthContext';
 
-const OrchidDetail = ({ loggedInUserEmail }) => {
+const OrchidDetail = () => {
+  const { user } = UserAuth();
   const { id } = useParams();
   const [orchid, setOrchid] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const loggedInUserEmail = user ? user.email : '';
+
 
   const fetchOrchidDetail = async () => {
     try {
@@ -36,10 +41,10 @@ const OrchidDetail = ({ loggedInUserEmail }) => {
         comment: feedback.comment,
         author: loggedInUserEmail,
         date: new Date().toISOString(),
-        orchidId: id // Include the orchid ID if necessary
+        orchidId: id
       };
   
-      const response = await fetch(`https://670ddcdb073307b4ee44b093.mockapi.io/OrchidResources/${id}`, {
+      const response = await fetch(`https://6724468e493fac3cf24db97b.mockapi.io/feedback`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newFeedback)
@@ -61,7 +66,7 @@ const OrchidDetail = ({ loggedInUserEmail }) => {
 
   return (
     <Box sx={{ padding: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <Card sx={{ maxWidth: 900, borderRadius: 3, boxShadow: 4, padding: 3, backgroundColor: '#fdfdfd' }}>
+      <Card sx={{ maxWidth: 1200, borderRadius: 3, boxShadow: 4, padding: 3, backgroundColor: '#fdfdfd' }}>
         <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
             <CardMedia
@@ -119,35 +124,19 @@ const OrchidDetail = ({ loggedInUserEmail }) => {
       </Card>
 
       {/* Feedback Section */}
-      <Box sx={{ marginTop: 4, width: '100%', maxWidth: 900 }}>
-        <Typography variant="h5" component="h2" fontWeight="bold" gutterBottom>
-          Feedback
-        </Typography>
-        {orchid.feedback && orchid.feedback.length === 0 ? (
-          <Typography variant="body2" color="text.secondary">No feedback available.</Typography>
-        ) : (
-          orchid.feedback.map((feedback, index) => (
-            <Card key={index} sx={{ marginBottom: 2, padding: 2, boxShadow: 2, borderRadius: 2 }}>
-              <Typography variant="body1" fontWeight="bold" mb={1}>
-                {feedback.comment}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">Rating: {feedback.rating}</Typography>
-              <Typography variant="body2" color="text.secondary">Author: {feedback.author}</Typography>
-              <Typography variant="body2" color="text.secondary">
-                Date: {new Date(feedback.date).toLocaleDateString()}
-              </Typography>
-            </Card>
-          ))
-        )}
+      <Box sx={{ width: '100%', maxWidth: 900, mt: 4 }}>
+  <Paper elevation={3} sx={{ padding: 3, borderRadius: 2 }}>
+    <Typography variant="h5" component="h2" fontWeight="bold" gutterBottom>
+      Feedback
+    </Typography>
+    <FeedbackForm 
+      orchidId={id} 
+      loggedInUserEmail={loggedInUserEmail}
+      onFeedbackSubmit={handleFeedbackSubmit} 
+    />
+  </Paper>
+</Box>
 
-        {/* Feedback Form */}
-        {/* <FeedbackForm 
-          orchidId={id}
-          loggedInUserEmail={loggedInUserEmail}
-          onFeedbackSubmit={handleFeedbackSubmit}
-        /> */}
-        <FeedbackForm orchidId="1" />
-      </Box>
     </Box>
   );
 };
