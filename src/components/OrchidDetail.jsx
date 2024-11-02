@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Box, Typography, Card, CardMedia, CardContent, Button, Divider, Grid, TextField } from "@mui/material";
+import { Box, Typography, Card, CardMedia, CardContent, Button, Divider, Grid } from "@mui/material";
+import FeedbackForm from "./FeedbackForm"; // Import the new FeedbackForm component
 
-const OrchidDetail = () => {
+const OrchidDetail = ({ loggedInUserEmail }) => {
   const { id } = useParams();
   const [orchid, setOrchid] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [newFeedback, setNewFeedback] = useState({ rating: '', comment: '', author: '' });
 
   const fetchOrchidDetail = async () => {
     try {
@@ -29,38 +29,26 @@ const OrchidDetail = () => {
     fetchOrchidDetail();
   }, [id]);
 
-  const handleFeedbackChange = (e) => {
-    setNewFeedback({ ...newFeedback, [e.target.name]: e.target.value });
-  };
-
-  const handleFeedbackSubmit = async (e) => {
-    e.preventDefault();
-  
-    // Check if the user has already submitted feedback for this orchid
-    const existingFeedback = orchid.feedback?.find(fb => fb.author === loggedInUserEmail);
-    if (existingFeedback) {
-      alert("You have already submitted feedback for this orchid.");
-      return;
-    }
-  
+  const handleFeedbackSubmit = async (feedback) => {
     try {
+      const newFeedback = {
+        rating: feedback.rating,
+        comment: feedback.comment,
+        author: loggedInUserEmail,
+        date: new Date().toISOString(),
+        orchidId: id // Include the orchid ID if necessary
+      };
+  
       const response = await fetch(`https://670ddcdb073307b4ee44b093.mockapi.io/OrchidResources/${id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...newFeedback, date: new Date().toISOString(), author: loggedInUserEmail })
+        body: JSON.stringify(newFeedback)
       });
-      
-      if (!response.ok) {
-        throw new Error('Failed to submit feedback');
-      }
-      const feedback = await response.json();
   
-      // Update the orchid feedback locally to show the new feedback immediately
-      setOrchid(prevOrchid => ({
-        ...prevOrchid,
-        feedback: [...(prevOrchid.feedback || []), feedback]
-      }));
-      setNewFeedback({ rating: '', comment: '', author: '' });
+      if (!response.ok) throw new Error('Failed to submit feedback');
+  
+      const createdFeedback = await response.json();
+      // Optionally update local state or handle success UI feedback
     } catch (error) {
       console.error('Error submitting feedback:', error);
     }
@@ -73,17 +61,8 @@ const OrchidDetail = () => {
 
   return (
     <Box sx={{ padding: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <Card 
-        sx={{
-          maxWidth: 900,
-          borderRadius: 3,
-          boxShadow: 4,
-          padding: 3,
-          backgroundColor: '#fdfdfd'
-        }}
-      >
+      <Card sx={{ maxWidth: 900, borderRadius: 3, boxShadow: 4, padding: 3, backgroundColor: '#fdfdfd' }}>
         <Grid container spacing={3}>
-          {/* Image Section */}
           <Grid item xs={12} md={6}>
             <CardMedia
               component="img"
@@ -93,19 +72,14 @@ const OrchidDetail = () => {
               sx={{ borderRadius: 2, objectFit: 'cover' }}
             />
           </Grid>
-
-          {/* Details Section */}
           <Grid item xs={12} md={6}>
             <CardContent>
               <Typography variant="h4" component="div" fontWeight="bold" gutterBottom>
                 {orchid.orchidName}
               </Typography>
-
-              {/* Display the price prominently */}
               <Typography variant="h5" color="primary" fontWeight="bold" sx={{ mb: 2 }}>
                 Price: ${orchid.price}
               </Typography>
-
               <Typography variant="body1" color="text.secondary" mb={2}>
                 {orchid.description}
               </Typography>
@@ -166,41 +140,13 @@ const OrchidDetail = () => {
           ))
         )}
 
-        {/* Add Feedback Form */}
-        <Box component="form" onSubmit={handleFeedbackSubmit} sx={{ marginTop: 4 }}>
-          <Typography variant="h6" gutterBottom>Add Your Feedback</Typography>
-          <TextField
-            name="rating"
-            label="Rating (1-5)"
-            variant="outlined"
-            value={newFeedback.rating}
-            onChange={handleFeedbackChange}
-            required
-            fullWidth
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            name="comment"
-            label="Comment"
-            variant="outlined"
-            value={newFeedback.comment}
-            onChange={handleFeedbackChange}
-            required
-            fullWidth
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            name="author"
-            label="Author"
-            variant="outlined"
-            value={newFeedback.author}
-            onChange={handleFeedbackChange}
-            required
-            fullWidth
-            sx={{ mb: 2 }}
-          />
-          <Button type="submit" variant="contained" color="primary">Submit Feedback</Button>
-        </Box>
+        {/* Feedback Form */}
+        {/* <FeedbackForm 
+          orchidId={id}
+          loggedInUserEmail={loggedInUserEmail}
+          onFeedbackSubmit={handleFeedbackSubmit}
+        /> */}
+        <FeedbackForm orchidId="1" />
       </Box>
     </Box>
   );
