@@ -1,4 +1,3 @@
-// FooterInfo.js
 import React from 'react';
 import { Box, Typography, Grid, Link, IconButton } from '@mui/material';
 import { Facebook, Twitter, Instagram, LinkedIn, Email } from '@mui/icons-material';
