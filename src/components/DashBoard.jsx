@@ -16,7 +16,8 @@ export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [newCategory, setNewCategory] = useState(''); // State for new category
-  const itemsPerPage = 5;
+  const [addNewCategoryMode, setAddNewCategoryMode] = useState(false); // Toggle for adding a new category
+  const itemsPerPage = 10;
   const baseURL = 'https://670ddcdb073307b4ee44b093.mockapi.io/OrchidResources';
 
   const fetchAPI = (page = 1) => {
@@ -68,6 +69,7 @@ export default function Dashboard() {
 
   const formik = useFormik({
     initialValues: {
+      id: '', // Add this to detect edit mode
       orchidName: '',
       description: '',
       image: '',
@@ -84,18 +86,22 @@ export default function Dashboard() {
       price: Yup.number().required('Required').min(1, 'Must be greater than zero'),
     }),
     onSubmit: (values, { resetForm }) => {
-      fetch(baseURL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
-      })
-        .then(() => {
-          toast.success('Created successfully!');
-          fetchAPI(currentPage);
-          resetForm();
-          handleClose();
+      if (values.id) {
+        handleEdit(values.id);
+      } else {
+        fetch(baseURL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(values),
         })
-        .catch((err) => console.error(err));
+          .then(() => {
+            toast.success('Created successfully!');
+            fetchAPI(currentPage);
+            resetForm();
+            handleClose();
+          })
+          .catch((err) => console.error(err));
+      }
     },
   });
 
@@ -103,8 +109,10 @@ export default function Dashboard() {
 
   const addNewCategory = () => {
     if (newCategory && !categories.includes(newCategory)) {
-      categories.push(newCategory); // Add new category to the categories array
-      setNewCategory(''); // Clear input field
+      categories.push(newCategory);
+      formik.setFieldValue('category', newCategory); // Set the new category as selected
+      setNewCategory('');
+      setAddNewCategoryMode(false); // Exit add mode after adding
     } else {
       toast.error('Category already exists or input is empty');
     }
@@ -218,46 +226,67 @@ export default function Dashboard() {
               helperText={formik.touched.price && formik.errors.price}
               margin="dense"
             />
-            <Select
-              fullWidth
-              name="category"
-              value={formik.values.category}
-              onChange={formik.handleChange}
-              error={formik.touched.category && Boolean(formik.errors.category)}
-              displayEmpty
-              sx={{ mt: 2 }}
-            >
-              <MenuItem value="" disabled>Select a category</MenuItem>
-              {categories.map((category) => (
-                <MenuItem key={category} value={category}>{category}</MenuItem>
-              ))}
-            </Select>
+            
+            {!addNewCategoryMode ? (
+              <Select
+                fullWidth
+                label="Category"
+                name="category"
+                value={formik.values.category}
+                onChange={formik.handleChange}
+                error={formik.touched.category && Boolean(formik.errors.category)}
+                displayEmpty
+              >
+                <MenuItem value="" disabled>
+                  Select category
+                </MenuItem>
+                {categories.map((category) => (
+                  <MenuItem key={category} value={category}>
+                    {category}
+                  </MenuItem>
+                ))}
+              </Select>
+            ) : (
+              <TextField
+                fullWidth
+                label="New Category"
+                value={newCategory}
+                onChange={(e) => setNewCategory(e.target.value)}
+                onBlur={() => addNewCategory()}
+                margin="dense"
+              />
+            )}
 
-            <TextField
-              fullWidth
-              label="Add New Category"
-              value={newCategory}
-              onChange={(e) => setNewCategory(e.target.value)}
-              margin="dense"
-            />
-            <Button onClick={addNewCategory} variant="outlined" color="primary" sx={{ mt: 1, mb: 2 }}>
-              Add Category
+            <Button variant="text" onClick={() => setAddNewCategoryMode(!addNewCategoryMode)} sx={{ mt: 1 }}>
+              {addNewCategoryMode ? 'Choose Existing Category' : 'Add New Category'}
             </Button>
 
             <FormControlLabel
-              control={<Switch name="isNatural" color="primary" checked={formik.values.isNatural} onChange={formik.handleChange} />}
+              control={
+                <Switch
+                  checked={formik.values.isNatural}
+                  onChange={formik.handleChange}
+                  name="isNatural"
+                />
+              }
               label="Natural"
             />
             <FormControlLabel
-              control={<Switch name="isAttractive" color="primary" checked={formik.values.isAttractive} onChange={formik.handleChange} />}
+              control={
+                <Switch
+                  checked={formik.values.isAttractive}
+                  onChange={formik.handleChange}
+                  name="isAttractive"
+                />
+              }
               label="Attractive"
             />
           </form>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="secondary">Cancel</Button>
+          <Button onClick={handleClose}>Cancel</Button>
           <Button onClick={formik.handleSubmit} color="primary">
-            {formik.values.id ? 'Save Changes' : 'Add Orchid'}
+            {formik.values.id ? 'Update' : 'Save'}
           </Button>
         </DialogActions>
       </Dialog>
