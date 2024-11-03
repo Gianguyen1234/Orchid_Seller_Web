@@ -13,7 +13,7 @@ import EditProfile from "./components/EditProfile";
 import Register from "./components/Register"; // Import your Register component
 import Protected from "./components/services/Protected";
 import DashBoard from "./components/DashBoard";
-import DashboardHome from "./components/dashboard/DashboardHome";
+
 
 const App = () => {
   return (
@@ -26,10 +26,9 @@ const App = () => {
         <Route path="/natural" element={<></>} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} /> {/* Add Register route */}
+        <Route path="/register" element={<Register />} />
         <Route path="/edit-profile" element={<EditProfile />} />
-        <Route path="/dashboard" element={<Protected><DashBoard /></Protected>} />
-        <Route path="/dbhome" element={<Protected><DashboardHome /></Protected>} />
+        <Route path="/dashboard" element={<Protected><DashBoard /></Protected>} />      
       </Routes>
       <FooterInfo />
     </div>
