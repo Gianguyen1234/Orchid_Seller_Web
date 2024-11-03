@@ -7,7 +7,6 @@ import OrchidDetail from "./components/OrchidDetail";
 import About from "./components/About";
 import FooterInfo from "./components/FooterInfo";
 import Contact from "./components/Contact";
-import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import Login from "./components/Login";
 import EditProfile from "./components/EditProfile";
 import Register from "./components/Register"; // Import your Register component
