@@ -15,6 +15,7 @@ export default function Dashboard() {
   const [open, setOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [newCategory, setNewCategory] = useState(''); // State for new category
   const itemsPerPage = 5;
   const baseURL = 'https://670ddcdb073307b4ee44b093.mockapi.io/OrchidResources';
 
@@ -98,8 +99,16 @@ export default function Dashboard() {
     },
   });
 
-  // Extract unique categories from orchid data
   const categories = [...new Set(apiData.map((orchid) => orchid.category))];
+
+  const addNewCategory = () => {
+    if (newCategory && !categories.includes(newCategory)) {
+      categories.push(newCategory); // Add new category to the categories array
+      setNewCategory(''); // Clear input field
+    } else {
+      toast.error('Category already exists or input is empty');
+    }
+  };
 
   return (
     <Container sx={{ mt: 4, mb: 4 }}>
@@ -197,7 +206,7 @@ export default function Dashboard() {
               helperText={formik.touched.image && formik.errors.image}
               margin="dense"
             />
-             <TextField
+            <TextField
               fullWidth
               label="Price"
               name="price"
@@ -218,26 +227,36 @@ export default function Dashboard() {
               displayEmpty
               sx={{ mt: 2 }}
             >
-              <MenuItem value="" disabled>Select Category</MenuItem>
+              <MenuItem value="" disabled>Select a category</MenuItem>
               {categories.map((category) => (
                 <MenuItem key={category} value={category}>{category}</MenuItem>
               ))}
             </Select>
+
+            <TextField
+              fullWidth
+              label="Add New Category"
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+              margin="dense"
+            />
+            <Button onClick={addNewCategory} variant="outlined" color="primary" sx={{ mt: 1, mb: 2 }}>
+              Add Category
+            </Button>
+
             <FormControlLabel
-              control={<Switch checked={formik.values.isNatural} onChange={formik.handleChange} name="isNatural" />}
+              control={<Switch name="isNatural" color="primary" checked={formik.values.isNatural} onChange={formik.handleChange} />}
               label="Natural"
-              sx={{ mt: 2 }}
             />
             <FormControlLabel
-              control={<Switch checked={formik.values.isAttractive} onChange={formik.handleChange} name="isAttractive" />}
+              control={<Switch name="isAttractive" color="primary" checked={formik.values.isAttractive} onChange={formik.handleChange} />}
               label="Attractive"
-              sx={{ mt: 2 }}
             />
           </form>
         </DialogContent>
-        <DialogActions sx={{ padding: 2 }}>
-          <Button onClick={handleClose} color="secondary" variant="outlined">Cancel</Button>
-          <Button onClick={formik.handleSubmit} color="primary" variant="contained" disabled={!formik.isValid || !formik.dirty}>
+        <DialogActions>
+          <Button onClick={handleClose} color="secondary">Cancel</Button>
+          <Button onClick={formik.handleSubmit} color="primary">
             {formik.values.id ? 'Save Changes' : 'Add Orchid'}
           </Button>
         </DialogActions>
