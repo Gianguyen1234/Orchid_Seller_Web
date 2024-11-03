@@ -1,34 +1,46 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, Switch, Select, MenuItem } from '@mui/material';
+import {
+  Container, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead,
+  TableRow, Paper, TextField, Dialog, DialogActions, DialogContent, DialogTitle,
+  FormControlLabel, Switch, Select, MenuItem, Pagination, Box, IconButton
+} from '@mui/material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { Edit, Delete } from '@mui/icons-material';
 
 export default function Dashboard() {
   const [apiData, setApiData] = useState([]);
   const [open, setOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const itemsPerPage = 5;
   const baseURL = 'https://670ddcdb073307b4ee44b093.mockapi.io/OrchidResources';
 
-  const fetchAPI = () => {
-    fetch(`${baseURL}?sortBy=id&order=desc`)
+  const fetchAPI = (page = 1) => {
+    fetch(`${baseURL}?page=${page}&limit=${itemsPerPage}&sortBy=id&order=desc`)
       .then((resp) => resp.json())
-      .then((data) => setApiData(data))
+      .then((data) => {
+        setApiData(data);
+        setTotalPages(Math.ceil(50 / itemsPerPage)); 
+      })
       .catch((err) => console.error(err));
   };
 
   useEffect(() => {
-    fetchAPI();
-  }, []);
+    fetchAPI(currentPage);
+  }, [currentPage]);
 
-  // Extract unique categories from orchid data
-  const categories = [...new Set(apiData.map((orchid) => orchid.category))];
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value);
+  };
 
   const handleDelete = (id) => {
     fetch(`${baseURL}/${id}`, { method: 'DELETE' })
       .then(() => {
         toast.success('Deleted successfully!');
-        fetchAPI();
+        fetchAPI(currentPage);
       })
       .catch((err) => console.error(err));
   };
@@ -42,7 +54,7 @@ export default function Dashboard() {
     })
       .then(() => {
         toast.success('Edited successfully!');
-        fetchAPI();
+        fetchAPI(currentPage);
         handleClose();
       })
       .catch((err) => console.error(err));
@@ -59,6 +71,7 @@ export default function Dashboard() {
       description: '',
       image: '',
       category: '',
+      price: '',
       isNatural: false,
       isAttractive: false,
     },
@@ -67,6 +80,7 @@ export default function Dashboard() {
       description: Yup.string().required('Required').min(10, 'Must be 10 characters or more'),
       image: Yup.string().required('Required').url('Must be a valid URL'),
       category: Yup.string().required('Select a category'),
+      price: Yup.number().required('Required').min(1, 'Must be greater than zero'),
     }),
     onSubmit: (values, { resetForm }) => {
       fetch(baseURL, {
@@ -76,7 +90,7 @@ export default function Dashboard() {
       })
         .then(() => {
           toast.success('Created successfully!');
-          fetchAPI();
+          fetchAPI(currentPage);
           resetForm();
           handleClose();
         })
@@ -84,34 +98,50 @@ export default function Dashboard() {
     },
   });
 
+  // Extract unique categories from orchid data
+  const categories = [...new Set(apiData.map((orchid) => orchid.category))];
+
   return (
-    <Container>
+    <Container sx={{ mt: 4, mb: 4 }}>
       <ToastContainer />
-      <Typography variant="h4" gutterBottom>Orchid Dashboard</Typography>
-      <Button variant="contained" color="primary" onClick={() => setOpen(true)}>Add Orchid</Button>
-      <TableContainer component={Paper} sx={{ mt: 3 }}>
+      <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+        Orchid Dashboard
+      </Typography>
+      <Button variant="contained" color="primary" onClick={() => setOpen(true)} sx={{ mb: 3 }}>
+        Add Orchid
+      </Button>
+
+      <TableContainer component={Paper} sx={{ boxShadow: 3 }}>
         <Table>
-          <TableHead>
+          <TableHead sx={{ bgcolor: 'primary.light' }}>
             <TableRow>
-              <TableCell>Image</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Category</TableCell>
-              <TableCell>Natural</TableCell>
-              <TableCell>Attractive</TableCell>
-              <TableCell>Actions</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', color: 'white' }}>Image</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', color: 'white' }}>Name</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', color: 'white' }}>Price</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', color: 'white' }}>Category</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', color: 'white' }}>Natural</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', color: 'white' }}>Attractive</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', color: 'white' }}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {apiData.map((orchid) => (
-              <TableRow key={orchid.id}>
-                <TableCell><img src={orchid.image} alt={orchid.orchidName} width="50" /></TableCell>
+              <TableRow key={orchid.id} hover>
+                <TableCell>
+                  <img src={orchid.image} alt={orchid.orchidName} width="50" style={{ borderRadius: '8px' }} />
+                </TableCell>
                 <TableCell>{orchid.orchidName}</TableCell>
+                <TableCell>{orchid.price}</TableCell>
                 <TableCell>{orchid.category}</TableCell>
                 <TableCell>{orchid.isNatural ? 'Yes' : 'No'}</TableCell>
                 <TableCell>{orchid.isAttractive ? 'Yes' : 'No'}</TableCell>
                 <TableCell>
-                  <Button color="primary" onClick={() => { setOpen(true); formik.setValues(orchid); }}>Edit</Button>
-                  <Button color="error" onClick={() => handleDelete(orchid.id)}>Delete</Button>
+                  <IconButton color="primary" onClick={() => { setOpen(true); formik.setValues(orchid); }}>
+                    <Edit />
+                  </IconButton>
+                  <IconButton color="error" onClick={() => handleDelete(orchid.id)}>
+                    <Delete />
+                  </IconButton>
                 </TableCell>
               </TableRow>
             ))}
@@ -119,8 +149,19 @@ export default function Dashboard() {
         </Table>
       </TableContainer>
 
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+        <Pagination
+          count={totalPages}
+          page={currentPage}
+          onChange={handlePageChange}
+          color="primary"
+        />
+      </Box>
+
       <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>{formik.values.id ? 'Edit Orchid' : 'Add Orchid'}</DialogTitle>
+        <DialogTitle sx={{ bgcolor: 'primary.main', color: 'white' }}>
+          {formik.values.id ? 'Edit Orchid' : 'Add Orchid'}
+        </DialogTitle>
         <DialogContent>
           <form onSubmit={formik.handleSubmit}>
             <TextField
@@ -156,6 +197,18 @@ export default function Dashboard() {
               helperText={formik.touched.image && formik.errors.image}
               margin="dense"
             />
+             <TextField
+              fullWidth
+              label="Price"
+              name="price"
+              type="number"
+              value={formik.values.price}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.price && Boolean(formik.errors.price)}
+              helperText={formik.touched.price && formik.errors.price}
+              margin="dense"
+            />
             <Select
               fullWidth
               name="category"
@@ -163,6 +216,7 @@ export default function Dashboard() {
               onChange={formik.handleChange}
               error={formik.touched.category && Boolean(formik.errors.category)}
               displayEmpty
+              sx={{ mt: 2 }}
             >
               <MenuItem value="" disabled>Select Category</MenuItem>
               {categories.map((category) => (
@@ -172,16 +226,18 @@ export default function Dashboard() {
             <FormControlLabel
               control={<Switch checked={formik.values.isNatural} onChange={formik.handleChange} name="isNatural" />}
               label="Natural"
+              sx={{ mt: 2 }}
             />
             <FormControlLabel
               control={<Switch checked={formik.values.isAttractive} onChange={formik.handleChange} name="isAttractive" />}
               label="Attractive"
+              sx={{ mt: 2 }}
             />
           </form>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="secondary">Cancel</Button>
-          <Button onClick={formik.handleSubmit} color="primary" disabled={!formik.isValid || !formik.dirty}>
+        <DialogActions sx={{ padding: 2 }}>
+          <Button onClick={handleClose} color="secondary" variant="outlined">Cancel</Button>
+          <Button onClick={formik.handleSubmit} color="primary" variant="contained" disabled={!formik.isValid || !formik.dirty}>
             {formik.values.id ? 'Save Changes' : 'Add Orchid'}
           </Button>
         </DialogActions>
