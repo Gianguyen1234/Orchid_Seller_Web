@@ -9,33 +9,53 @@ import {
   Select,
   MenuItem,
   Container,
+  TextField,
 } from '@mui/material';
-import Fire from '../assets/fire.png'; // Import the fire image
+import Fire from '../assets/fire.png'; 
 import OrchidCard from './OrchidCard';
 
 export default function OrchidsPresentation({ orchidData }) {
   const [ratingFilter, setRatingFilter] = React.useState('5 Star');
   const [sortAttribute, setSortAttribute] = React.useState('');
   const [sortOrder, setSortOrder] = React.useState('asc');
+  const [searchQuery, setSearchQuery] = React.useState(''); // State for search query
+  const [selectedCategory, setSelectedCategory] = React.useState(''); // New state for category filter
 
   const handleRatingChange = (event, newRating) => {
     if (newRating !== null) setRatingFilter(newRating);
   };
 
-  // Function to filter and sort the orchids based on selected options
+  // Get unique categories from the orchid data for the filter
+  const uniqueCategories = Array.from(new Set(orchidData.map(orchid => orchid.category)));
+
   const filteredOrchids = orchidData.filter(orchid => {
+    console.log("Applying Filters:", ratingFilter, searchQuery, selectedCategory); // Check filters
     if (ratingFilter === '5 Star' && orchid.rating < 5) return false;
     if (ratingFilter === '4+ Star' && orchid.rating < 4) return false;
     if (ratingFilter === '3+ Star' && orchid.rating < 3) return false;
+    if (searchQuery && !orchid.orchidName.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    if (selectedCategory && orchid.category !== selectedCategory) return false; // Filter by category
     return true;
   });
 
-  const sortedOrchids = filteredOrchids.sort((a, b) => {
+  const sortedOrchids = [...filteredOrchids].sort((a, b) => {
     const order = sortOrder === 'asc' ? 1 : -1;
-    if (sortAttribute === 'rating') {
-      return (a.rating - b.rating) * order;
+
+    // Sort by the selected attribute
+    if (sortAttribute === 'natural') {
+      return (Number(b.isNatural) - Number(a.isNatural)) * order; // Sort by isNatural
+    } else if (sortAttribute === 'attractive') {
+      return (Number(b.isAttractive) - Number(a.isAttractive)) * order; // Sort by isAttractive
+    } else if (sortAttribute === 'rating') {
+      return (b.rating - a.rating) * order; // Sort by rating
+    } else if (sortAttribute === 'category') {
+      // Sort by category, assuming category is a string
+      if (a.category < b.category) return -1 * order;
+      if (a.category > b.category) return 1 * order;
+      return 0; // Categories are equal
     }
-    return 0; // Default natural order if no attribute selected
+    // Default sort by id if no sort attribute is specified
+    return (a.id - b.id) * order; 
   });
 
   return (
@@ -56,6 +76,18 @@ export default function OrchidsPresentation({ orchidData }) {
         Discover our top-rated orchids on sale
       </Typography>
 
+      {/* Search Bar */}
+      <Box mb={4}>
+        <TextField
+          label="Search Orchids"
+          variant="outlined"
+          fullWidth
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          sx={{ mb: 2 }}
+        />
+      </Box>
+
       {/* Filters and Sort */}
       <Stack direction="row" spacing={3} alignItems="center" justifyContent="center" mb={4}>
         {/* Rating Filter */}
@@ -73,6 +105,26 @@ export default function OrchidsPresentation({ orchidData }) {
           ))}
         </ToggleButtonGroup>
 
+        {/* Category Filter */}
+        <FormControl variant="outlined" size="small">
+          <Select
+            id="category-filter"
+            value={selectedCategory}
+            displayEmpty
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            sx={{ minWidth: 120 }}
+          >
+            <MenuItem value="">
+              <em>All Categories</em>
+            </MenuItem>
+            {uniqueCategories.map((category) => (
+              <MenuItem key={category} value={category}>
+                {category}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
         {/* Sort By Attribute */}
         <FormControl variant="outlined" size="small">
           <Select
@@ -86,7 +138,9 @@ export default function OrchidsPresentation({ orchidData }) {
               <em>Sort By</em>
             </MenuItem>
             <MenuItem value="natural">Natural</MenuItem>
+            <MenuItem value="attractive">Attractive</MenuItem>
             <MenuItem value="rating">Rating</MenuItem>
+            <MenuItem value="category">Category</MenuItem> {/* Added sort by category */}
           </Select>
         </FormControl>
 

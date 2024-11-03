@@ -1,294 +1,191 @@
-import React from 'react'
-import { useState, useEffect } from 'react';
-import { Button, Col, Container, Row, Table,Image, Modal, Form } from "react-bootstrap"
+import React, { useState, useEffect } from 'react';
+import { Container, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, Switch, Select, MenuItem } from '@mui/material';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
 import { ToastContainer, toast } from 'react-toastify';
-import "react-toastify/dist/ReactToastify.css"
-import {useFormik} from 'formik'
-import * as Yup from 'yup'
+import 'react-toastify/dist/ReactToastify.css';
 
-export default function DashBoard() {
-  const [api, setAPI] = useState([])
-  const [show, setShow] = useState(false);
-  const [formData, setFormData] = useState(api);
-  //EDIT
-  const handleInputChange = (e) => {
-      const { name, value } = e.target;
-      setFormData({
-          ...formData,
-          [name]: value
-      });
+export default function Dashboard() {
+  const [apiData, setApiData] = useState([]);
+  const [open, setOpen] = useState(false);
+  const baseURL = 'https://670ddcdb073307b4ee44b093.mockapi.io/OrchidResources';
+
+  const fetchAPI = () => {
+    fetch(`${baseURL}?sortBy=id&order=desc`)
+      .then((resp) => resp.json())
+      .then((data) => setApiData(data))
+      .catch((err) => console.error(err));
   };
 
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
-  const baseURL = 'https://670ddcdb073307b4ee44b093.mockapi.io/OrchidResources'
+  useEffect(() => {
+    fetchAPI();
+  }, []);
 
-const categories = [
-  {id: 'Dendrobium', name:'Dendrobium'},
-  {id: 'Cattleya', name:'Cattleya'},
-  {id:'Brassavola', name:'Brassavola'}
-]
+  // Extract unique categories from orchid data
+  const categories = [...new Set(apiData.map((orchid) => orchid.category))];
 
- const fetchAPI = ()=>{
-   fetch(baseURL + '?sortBy=id&order=desc')
-  .then(resp => resp.json())
-  .then(data => setAPI(data))
-  .catch(err => console.error(err))
- }
- useEffect(() => {
-   fetchAPI()
- }, []);
-  //DELETE --
-  const handleDelete = (id) =>{
-    fetch(baseURL + '/' + id,{method: 'DELETE'})
-    .then(()=> {
-      toast.success('Delete successfully!')
-      fetchAPI()
-    }
-    )
-    .catch(err => console.error(err))
-  }
-  //EDIT?
-  const handleEdit = (id) =>{
-    fetch(baseURL + '/' + id,{method: 'PUT'})
-    .then(()=> {
-      
-      toast.success('Edit successfully!')
-      fetchAPI()
-    }
-    )
-    .catch(err => console.error(err))
-  }
-  const formik = useFormik({
-    initialValues:{
-      orchidName:'',
-      description:'',
-      image:'',
-      category:'',
-      isNatural: false,
-      isAttractive: false
-    },
-    onSubmit: values =>{
-      //alert(JSON.stringify(values))
-      fetch(baseURL,{method:'POST',
-        body: JSON.stringify(values),
-        headers: {
-          'Content-Type': 'application/json'
-          },
-          credentials: 'same-origin'
-      
+  const handleDelete = (id) => {
+    fetch(`${baseURL}/${id}`, { method: 'DELETE' })
+      .then(() => {
+        toast.success('Deleted successfully!');
+        fetchAPI();
       })
-      .then(()=>{
-        handleClose()
-        toast.success('Create successfully')
-        fetchAPI()
-      })
-    },
-     validationSchema : Yup.object({
-      orchidName: Yup.string().required("Required.").min(2, "Must be 2 characters or more"),
-      description: Yup.string().required("Required.").min(10, "Must be 10 characters or more"),
-      image: Yup.string().required("Required.").min(2, "Must be 2 characters or more"),
+      .catch((err) => console.error(err));
+  };
 
+  const handleEdit = (id) => {
+    const editedData = formik.values;
+    fetch(`${baseURL}/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(editedData),
     })
-   })
+      .then(() => {
+        toast.success('Edited successfully!');
+        fetchAPI();
+        handleClose();
+      })
+      .catch((err) => console.error(err));
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    formik.resetForm();
+  };
+
+  const formik = useFormik({
+    initialValues: {
+      orchidName: '',
+      description: '',
+      image: '',
+      category: '',
+      isNatural: false,
+      isAttractive: false,
+    },
+    validationSchema: Yup.object({
+      orchidName: Yup.string().required('Required').min(2, 'Must be 2 characters or more'),
+      description: Yup.string().required('Required').min(10, 'Must be 10 characters or more'),
+      image: Yup.string().required('Required').url('Must be a valid URL'),
+      category: Yup.string().required('Select a category'),
+    }),
+    onSubmit: (values, { resetForm }) => {
+      fetch(baseURL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values),
+      })
+        .then(() => {
+          toast.success('Created successfully!');
+          fetchAPI();
+          resetForm();
+          handleClose();
+        })
+        .catch((err) => console.error(err));
+    },
+  });
 
   return (
-    <>
-      <Container>
-        <ToastContainer/>
-      <Row className='py-3'>
-{/* ADD */}
-      <Modal show={show} onHide={handleClose}>
-        <Modal.Header closeButton>
-          <Modal.Title style={{color:'black'}}>Modal Add Orchid</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form onSubmit={formik.handleSubmit}>
-            <Form.Group className="mb-3">
-              <Form.Label style={{color:'black'}}>Name</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Name of orchid"
-                name='orchidName'
-                value={formik.values.name} onChange={formik.handleChange}
-              />
-            </Form.Group>
+    <Container>
+      <ToastContainer />
+      <Typography variant="h4" gutterBottom>Orchid Dashboard</Typography>
+      <Button variant="contained" color="primary" onClick={() => setOpen(true)}>Add Orchid</Button>
+      <TableContainer component={Paper} sx={{ mt: 3 }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Image</TableCell>
+              <TableCell>Name</TableCell>
+              <TableCell>Category</TableCell>
+              <TableCell>Natural</TableCell>
+              <TableCell>Attractive</TableCell>
+              <TableCell>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {apiData.map((orchid) => (
+              <TableRow key={orchid.id}>
+                <TableCell><img src={orchid.image} alt={orchid.orchidName} width="50" /></TableCell>
+                <TableCell>{orchid.orchidName}</TableCell>
+                <TableCell>{orchid.category}</TableCell>
+                <TableCell>{orchid.isNatural ? 'Yes' : 'No'}</TableCell>
+                <TableCell>{orchid.isAttractive ? 'Yes' : 'No'}</TableCell>
+                <TableCell>
+                  <Button color="primary" onClick={() => { setOpen(true); formik.setValues(orchid); }}>Edit</Button>
+                  <Button color="error" onClick={() => handleDelete(orchid.id)}>Delete</Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
-            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-              <Form.Label style={{color:'black'}}>Image</Form.Label>
-              <Form.Control
-                type="text"
-              name='image'
-              value={formik.values.image} onChange={formik.handleChange}
-
-              />
-            </Form.Group>
-
-            <Form.Group
-              className="mb-3"
-              controlId="exampleForm.ControlTextarea1"
-            >
-              <Form.Label style={{color:'black'}}>description</Form.Label>
-              <Form.Control as="textarea" rows={3}
-              name='description'
-              value={formik.values.description} onChange={formik.handleChange}
-              />
-            </Form.Group>
-
-            <Form.Group>
-            <Form.Check // prettier-ignore
-              type="switch"
-              id="custom-switch"
-              label="Natural"
-              name='isNatural'
-              value={formik.values.isNatural} onChange={formik.handleChange}
-              style={{color:'black'}}
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle>{formik.values.id ? 'Edit Orchid' : 'Add Orchid'}</DialogTitle>
+        <DialogContent>
+          <form onSubmit={formik.handleSubmit}>
+            <TextField
+              fullWidth
+              label="Orchid Name"
+              name="orchidName"
+              value={formik.values.orchidName}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.orchidName && Boolean(formik.errors.orchidName)}
+              helperText={formik.touched.orchidName && formik.errors.orchidName}
+              margin="dense"
             />
-            </Form.Group>
-            <Form.Group>
-            <Form.Check // prettier-ignore
-              type="switch"
-              id="custom-switch"
-              label="Attractive"
-              name='isAttractive'
-              value={formik.values.isAttractive} onChange={formik.handleChange}
-              style={{color:'black'}}
-            />          
-            </Form.Group>
-
-            <Form.Group>
-            <Form.Select aria-label="Default select example" name='category'
-             value={formik.values.category} onChange={formik.handleChange}
-
-            >
-              {categories.map((c)=>(
-                <option value={c.id}>{c.name}</option>
-              ))}       
-            </Form.Select>
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={formik.handleSubmit}>
-            Save Changes
-          </Button>
-        </Modal.Footer>
-      </Modal>
-{/* EDIT */}
-      {/* <Modal show={show} onHide={handleClose}>
-        <Modal.Header closeButton>
-          <Modal.Title style={{color:'black'}}>Modal Edit Orchid</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form onSubmit={handleEdit}>
-            <Form.Group className="mb-3">
-              <Form.Label style={{color:'black'}}>Name</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Name of orchid"
-                name='orchidName'
-                value={api.orchidName} onChange={handleInputChange}
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-              <Form.Label style={{color:'black'}}>Image</Form.Label>
-              <Form.Control
-                type="text"
-              name='image'
-              value={api.image} onChange={handleInputChange}
-              />
-            </Form.Group>
-
-            <Form.Group
-              className="mb-3"
-              controlId="exampleForm.ControlTextarea1"
-            >
-              <Form.Label style={{color:'black'}}>description</Form.Label>
-              <Form.Control as="textarea" rows={3}
-              name='description'
-              value={api.description} onChange={handleInputChange}
-
-              />
-            </Form.Group>
-
-            <Form.Group>
-            <Form.Check // prettier-ignore
-              type="switch"
-              id="custom-switch"
-              label="Natural"
-              name='isNatural'
-              value={formik.values.isNatural} onChange={formik.handleChange}
-              style={{color:'black'}}
+            <TextField
+              fullWidth
+              label="Description"
+              name="description"
+              value={formik.values.description}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.description && Boolean(formik.errors.description)}
+              helperText={formik.touched.description && formik.errors.description}
+              margin="dense"
             />
-            </Form.Group>
-            <Form.Group>
-            <Form.Check // prettier-ignore
-              type="switch"
-              id="custom-switch"
-              label="Attractive"
-              name='isAttractive'
-              value={formik.values.isAttractive} onChange={formik.handleChange}
-              style={{color:'black'}}
-            />          
-            </Form.Group>
-
-            <Form.Group>
-            <Form.Select aria-label="Default select example" name='category'
-             value={formik.values.category} onChange={formik.handleChange}
-
+            <TextField
+              fullWidth
+              label="Image URL"
+              name="image"
+              value={formik.values.image}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.image && Boolean(formik.errors.image)}
+              helperText={formik.touched.image && formik.errors.image}
+              margin="dense"
+            />
+            <Select
+              fullWidth
+              name="category"
+              value={formik.values.category}
+              onChange={formik.handleChange}
+              error={formik.touched.category && Boolean(formik.errors.category)}
+              displayEmpty
             >
-              {categories.map((c)=>(
-                <option value={c.id}>{c.name}</option>
-              ))}       
-            </Form.Select>
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Close
+              <MenuItem value="" disabled>Select Category</MenuItem>
+              {categories.map((category) => (
+                <MenuItem key={category} value={category}>{category}</MenuItem>
+              ))}
+            </Select>
+            <FormControlLabel
+              control={<Switch checked={formik.values.isNatural} onChange={formik.handleChange} name="isNatural" />}
+              label="Natural"
+            />
+            <FormControlLabel
+              control={<Switch checked={formik.values.isAttractive} onChange={formik.handleChange} name="isAttractive" />}
+              label="Attractive"
+            />
+          </form>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="secondary">Cancel</Button>
+          <Button onClick={formik.handleSubmit} color="primary" disabled={!formik.isValid || !formik.dirty}>
+            {formik.values.id ? 'Save Changes' : 'Add Orchid'}
           </Button>
-          <Button variant="primary" onClick={formik.handleSubmit}>
-            Save Changes
-          </Button>
-        </Modal.Footer>
-      </Modal> */}
-
-          <Col>        
-    <Table striped bordered hover>
-      <thead>
-        <tr>
-          <th>img</th>
-          <th>Name</th>
-          <th>Natural</th>
-          <th>Category</th>
-          <th>Attractive</th>
-          <th colSpan={2}>Actions | <i onClick={handleShow} className="bi bi-plus-circle"></i> </th>
-        </tr>
-      </thead>
-      <tbody>
-        {api.map((a)=>(
-          <tr key={a.id}>
-          <td><Image src={a.image} style={{ width: 60}} thumbnail/></td>
-          <td>{a.orchidName}</td>
-          <td>{a.isNatural ? <i className="bi bi-emoji-heart-eyes"></i> : <i className="bi bi-emoji-heart-eyes-fill"></i>}</td>
-          <td>{a.category}</td>
-          <td>{a.isAttractive ? <i className="bi bi-balloon-heart"></i> : <i className="bi bi-balloon-heart-fill"></i>}</td>
-          <td>EDIT | <i className="bi bi-pencil" 
-          onClick={() => handleEdit(a.id)}></i></td> 
-          <td>DELETE | <i className="bi bi-trash3-fill" 
-          onClick={()=>{ if(confirm('Do u wanna delete?')) handleDelete(a.id)}}></i></td>    
-        </tr>
-        ))}
-      </tbody>
-    </Table>
-          </Col>
-        </Row>
-      </Container>
-    </>
-  )
+        </DialogActions>
+      </Dialog>
+    </Container>
+  );
 }

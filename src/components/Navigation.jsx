@@ -78,7 +78,7 @@ function Navigation() {
             }} />
             <Typography variant="button" sx={{ color: "#4b4b4b", ml: 0.5, "&:hover": { color: "#ff8a65" } }}>Our Story</Typography>
           </Link>
-          <Link to="/dbhome" style={{ textDecoration: "none", display: "flex", alignItems: "center" }}>
+          <Link to="/dashboard" style={{ textDecoration: "none", display: "flex", alignItems: "center" }}>
             <DashboardIcon sx={{
               fontSize: 24,
               color: "#4b4b4b",
