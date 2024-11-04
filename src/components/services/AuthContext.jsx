@@ -41,7 +41,7 @@ export const AuthContextProvider = ({ children }) => {
 // Update user profile
 const updateUserProfile = async (displayName, photoURL) => {
     if (user) {
-      return updateProfile(user, { displayName, photoURL }); // This will save the display name and photo URL
+      return updateProfile(user, { displayName, photoURL }); // This will save the user name and photo URL
     } else {
       throw new Error("No user is currently logged in.");
     }
