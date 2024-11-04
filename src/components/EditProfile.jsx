@@ -42,13 +42,13 @@ export default function EditProfile() {
       </Typography>
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <Avatar
-          src={photoURL} // Display the image from the URL
+          src={photoURL} 
           alt={displayName}
           sx={{
             width: 120,
             height: 120,
             mb: 2,
-            border: '2px solid #3f51b5', // Add a border
+            border: '2px solid #3f51b5',
           }}
         />
         <TextField
@@ -70,7 +70,7 @@ export default function EditProfile() {
           required
         />
         <TextField
-          label="Profile Picture URL" // Accept URL for profile picture
+          label="Profile Picture URL" 
           value={photoURL}
           onChange={(e) => setPhotoURL(e.target.value)}
           fullWidth
@@ -82,7 +82,7 @@ export default function EditProfile() {
           variant="contained"
           color="primary"
           onClick={handleUpdateProfile}
-          sx={{ mt: 2, bgcolor: '#3f51b5', '&:hover': { bgcolor: '#303f9f' } }} // Change button color
+          sx={{ mt: 2, bgcolor: '#3f51b5', '&:hover': { bgcolor: '#303f9f' } }} 
         >
           Save Changes
         </Button>
