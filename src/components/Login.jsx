@@ -3,9 +3,18 @@ import { UserAuth } from './services/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from './services/firebase'; // Import auth here
+import { auth } from './services/firebase';
 import { FaGoogle } from 'react-icons/fa';
-import "../assets/css/Login.css";
+import {
+  Card,
+  CardContent,
+  Typography,
+  TextField,
+  Button,
+  Grid,
+  Divider,
+  Box,
+} from '@mui/material';
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -46,53 +55,148 @@ export default function Login() {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <form onSubmit={handleSubmit} className="login-form">
-          <h3>Welcome Back</h3>
-
-          <div className="form-group">
-            <label>Email</label>
-            <input
-              type="email"
-              className="form-control"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Password</label>
-            <input
-              type="password"
-              className="form-control"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-
-          <div className="d-grid">
-            <button type="submit" className="btn-modern">
-              Login
-            </button>
-          </div>
-
-          <button onClick={handleGoogleSignIn} className="btn-google">
-            <span className="google-icon-container">
-              <FaGoogle className="google-icon" />
-            </span>
-            Sign in with Google
-          </button>
-
-          <div className="register-link">
-            <p>
-              New user? <a href="/register">Create an account</a>
-            </p>
-          </div>
-        </form>
-      </div>
-    </div>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 2,
+      }}
+    >
+      <Grid container justifyContent="center">
+        <Grid item xs={12} sm={8} md={5} lg={4}>
+          <Card
+            elevation={10}
+            sx={{
+              borderRadius: 3,
+              paddingX: 4,
+              paddingY: 6,
+              backgroundColor: '#fff',
+              boxShadow: '0px 6px 20px rgba(0, 0, 0, 0.1)',
+              transition: 'transform 0.3s ease',
+              '&:hover': {
+                transform: 'scale(1.02)',
+              },
+            }}
+          >
+            <CardContent>
+              <Typography
+                variant="h4"
+                align="center"
+                sx={{
+                  fontWeight: 700,
+                  mb: 2,
+                  color: '#52734d',
+                  fontSize: { xs: '1.8rem', md: '2.2rem' },
+                }}
+              >
+                Welcome Back
+              </Typography>
+              <Typography
+                variant="body1"
+                align="center"
+                color="textSecondary"
+                sx={{ mb: 3 }}
+              >
+                Sign in to continue
+              </Typography>
+              <form onSubmit={handleSubmit}>
+                <TextField
+                  label="Email"
+                  type="email"
+                  fullWidth
+                  margin="normal"
+                  variant="outlined"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  sx={{
+                    borderRadius: 2,
+                    '& .MuiOutlinedInput-root': {
+                      '& fieldset': {
+                        borderColor: '#52734d',
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#86a77a',
+                      },
+                    },
+                  }}
+                />
+                <TextField
+                  label="Password"
+                  type="password"
+                  fullWidth
+                  margin="normal"
+                  variant="outlined"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  sx={{
+                    borderRadius: 2,
+                    mb: 2,
+                    '& .MuiOutlinedInput-root': {
+                      '& fieldset': {
+                        borderColor: '#52734d',
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#86a77a',
+                      },
+                    },
+                  }}
+                />
+                <Button
+                  type="submit"
+                  variant="contained"
+                  fullWidth
+                  sx={{
+                    mt: 2,
+                    py: 1.5,
+                    borderRadius: 3,
+                    backgroundColor: '#52734d',
+                    fontWeight: 'bold',
+                    fontSize: '1rem',
+                    '&:hover': { backgroundColor: '#6f8f68' },
+                  }}
+                >
+                  Login
+                </Button>
+                <Divider sx={{ my: 3, color: 'textSecondary' }}>or</Divider>
+                <Button
+                  onClick={handleGoogleSignIn}
+                  variant="outlined"
+                  fullWidth
+                  startIcon={<FaGoogle />}
+                  sx={{
+                    py: 1.5,
+                    borderRadius: 3,
+                    color: '#52734d',
+                    borderColor: '#52734d',
+                    fontWeight: 'bold',
+                    '&:hover': {
+                      backgroundColor: 'rgba(82, 115, 77, 0.1)',
+                      borderColor: '#86a77a',
+                      color: '#6f8f68',
+                    },
+                  }}
+                >
+                  Sign in with Google
+                </Button>
+              </form>
+              <Typography
+                align="center"
+                variant="body2"
+                sx={{ mt: 3, color: '#52734d' }}
+              >
+                New user?{' '}
+                <a href="/register" style={{ color: '#6f8f68', textDecoration: 'none' }}>
+                  Create an account
+                </a>
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+    </Box>
   );
 }

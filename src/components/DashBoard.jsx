@@ -16,7 +16,7 @@ export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [newCategory, setNewCategory] = useState(''); // State for new category
-  const [addNewCategoryMode, setAddNewCategoryMode] = useState(false); // Toggle for adding a new category
+  const [addNewCategoryMode, setAddNewCategoryMode] = useState(false); 
   const itemsPerPage = 10;
   const baseURL = 'https://670ddcdb073307b4ee44b093.mockapi.io/OrchidResources';
 
