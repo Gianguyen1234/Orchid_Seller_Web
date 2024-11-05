@@ -31,7 +31,6 @@ function Navigation() {
   };
 
   useEffect(() => {
-    // Listen for user state changes
   }, [user]);
 
   return (
