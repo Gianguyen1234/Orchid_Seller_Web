@@ -9,7 +9,7 @@ import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCfWMPvvtCEUICB1qW-5wuqJDYoFb4eRGs",
+  apiKey: "Google_API_KEY",
   authDomain: "course-management-system-4d9f1.firebaseapp.com",
   projectId: "course-management-system-4d9f1",
   storageBucket: "course-management-system-4d9f1.appspot.com",
