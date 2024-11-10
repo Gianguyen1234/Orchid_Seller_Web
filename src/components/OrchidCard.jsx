@@ -44,7 +44,7 @@ export default function OrchidCard({ orchid }) {
           
           <Box display="flex" alignItems="center" mb={2}>
             <Typography variant="body1" fontWeight="bold" mr={1} sx={{ color: "orange" }}>
-              5.0
+            {orchid.rating}
             </Typography>
             <img src={Star} alt="rating icon" style={{ width: 20, height: 20, marginLeft: 4 }} />
           </Box>
