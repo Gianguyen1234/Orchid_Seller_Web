@@ -16,6 +16,8 @@ This app allows users to browse various types of orchids available for sale. It 
 - **API Fetching**: Fetches data dynamically from an external API.
 - **Responsive Design**: Styled with Material UI for a modern, responsive user interface.
 - **Filtering/Search**: (Optional) You may add filtering or search functionalities to enhance user experience.
+- **Profile Update**: Users can update their profile information to keep their details current.
+- **Filtering/Search**: Additional features like filtering or search can enhance the browsing experience.
 
 ## Technologies Used
 
