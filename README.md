@@ -1,6 +1,4 @@
-# Orchid Seller
-
-Here’s a README template for your Orchid Seller web app:
+# React+Vite
 
 ---
 
