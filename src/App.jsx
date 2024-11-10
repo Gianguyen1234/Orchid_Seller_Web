@@ -13,7 +13,6 @@ import Register from "./components/Register"; // Import your Register component
 import Protected from "./components/services/Protected";
 import DashBoard from "./components/DashBoard";
 
-
 const App = () => {
   return (
     <div className="app">
