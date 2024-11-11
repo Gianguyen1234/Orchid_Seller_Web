@@ -1,8 +1,7 @@
 # React+Vite
-
 ---
 
-# Orchid Seller Web
+# Orchid Seller Web  ![Open Source](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)
 
 Welcome to the **Orchid Seller Web** project! This project is a simple web application developed with React, Vite, and Material UI. It is designed to help practice fetching data from APIs in React. 
 
